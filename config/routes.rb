@@ -1,5 +1,9 @@
 Rails.application.routes.draw do
   # API routes for Users
+  devise_for :users, controllers: {
+    sessions: 'users/sessions',
+    registrations: 'users/registrations'
+  }
   resources :users, only: [:index, :show, :create, :update, :destroy]
 
   # Other resources for your app
