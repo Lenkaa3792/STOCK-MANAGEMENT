@@ -4,13 +4,13 @@ class SalesController < ApplicationController
 
   # GET /sales
   def index
-    @sales = Sale.all
-    render json: @sales
+    @sales = Sale.includes(:user).all
+    render json: @sales.as_json(include: :user)
   end
 
   # GET /sales/:id
   def show
-    render json: @sale
+    render json: @sale.as_json(include: :user)
   end
 
   # POST /sales
@@ -44,11 +44,11 @@ class SalesController < ApplicationController
   private
 
   def set_sale
-    @sale = Sale.find(params[:id])
+    @sale = Sale.includes(:user).find(params[:id])
   end
 
   def set_product
-    @product = Product.find(params[:sale][:product_id])
+    @product = Product.find(sale_params[:product_id])
   end
 
   def sale_params
@@ -60,7 +60,6 @@ class SalesController < ApplicationController
     new_stock_level = product.stock_level - quantity_change
     if new_stock_level < 0
       render json: { error: 'Insufficient stock' }, status: :unprocessable_entity
-      raise ActiveRecord::Rollback
     else
       product.update(stock_level: new_stock_level)
     end

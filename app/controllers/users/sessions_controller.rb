@@ -4,10 +4,8 @@ class Users::SessionsController < Devise::SessionsController
     self.resource = User.find_by(email: params[:user][:email])
 
     if resource && resource.valid_password?(params[:user][:password])
-      sign_in(resource_name, resource)
-      session[:user_id] = resource.id
-      session_id = SecureRandom.uuid
-      render json: { success: true, message: 'Logged in successfully.', session_id: session_id, resource: resource }
+
+      render json: { success: true, message: 'Logged in successfully.', resource: resource }
     elsif !resource
       render json: { success: false, message: 'Please enter a valid email address' }, status: :not_found
     elsif !resource.valid_password?(params[:user][:password])

@@ -16,8 +16,7 @@ class DeliveriesController < ApplicationController
   def create
     @delivery = Delivery.new(delivery_params)
     if @delivery.save
-      create_expense(@delivery)
-      update_order_status_if_needed(@delivery)
+      create_expense if params[:expense] # Check if expense params are provided
       render json: @delivery, status: :created, location: @delivery
     else
       render json: @delivery.errors, status: :unprocessable_entity
@@ -26,14 +25,7 @@ class DeliveriesController < ApplicationController
 
   # PATCH/PUT /deliveries/:id
   def update
-    previous_delivery = @delivery.dup
     if @delivery.update(delivery_params)
-      # Only create a new expense if the cost or other related attributes change
-      if delivery_cost_changed?(previous_delivery, @delivery)
-        create_expense(@delivery)
-      end
-      # Update order status if needed
-      update_order_status_if_needed(@delivery)
       render json: @delivery
     else
       render json: @delivery.errors, status: :unprocessable_entity
@@ -53,26 +45,20 @@ class DeliveriesController < ApplicationController
   end
 
   def delivery_params
-    params.require(:delivery).permit(:order_id, :scheduled_date, :delivery_date, :status, :cost)
-  end
-
-  def create_expense(delivery)
-    Expense.create(
-      amount: delivery.cost,
-      description: "Delivery cost for order #{delivery.order_id}",
-      date: Date.today,
-      category: "Delivery"
+    params.require(:delivery).permit(
+      :order_id,
+      :scheduled_date,
+      :delivery_date,
+      :status
     )
   end
 
-  def delivery_cost_changed?(previous, current)
-    previous.cost != current.cost
-  end
-
-  def update_order_status_if_needed(delivery)
-    if delivery.status == "delivered"
-      order = Order.find(delivery.order_id)
-      order.update(status: "delivered")
-    end
+  def create_expense
+    Expense.create!(
+      description: params[:expense][:description],
+      amount: params[:expense][:amount],
+      expense_date: params[:expense][:expense_date],
+      category: params[:expense][:category]
+    )
   end
 end
