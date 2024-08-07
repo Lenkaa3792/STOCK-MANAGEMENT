@@ -1,5 +1,4 @@
-class UsersController < ApplicationController
-  before_action :authenticate_user!  # Ensure the user is authenticated before accessing any actions
+class UsersController < ApplicationController  # Ensure the user is authenticated before accessing any actions
   before_action :set_user, only: %i[show update destroy]
 
   # GET /users
