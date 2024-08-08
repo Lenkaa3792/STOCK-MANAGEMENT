@@ -3,13 +3,13 @@ class DeliveriesController < ApplicationController
 
   # GET /deliveries
   def index
-    @deliveries = Delivery.all
-    render json: @deliveries
+    @deliveries = Delivery.includes(:order).all
+    render json: @deliveries.as_json(include: :order)
   end
 
   # GET /deliveries/:id
   def show
-    render json: @delivery
+    render json: @delivery.as_json(include: :order)
   end
 
   # POST /deliveries
@@ -44,6 +44,7 @@ class DeliveriesController < ApplicationController
   end
 
   def delivery_params
-    params.require(:delivery).permit(:order_id, :scheduled_date, :delivery_date, :status, :address)
+    params.require(:delivery).permit(:order_id, :scheduled_date, :delivery_date, :status, :address, :delivery_cost)
   end
+
 end
