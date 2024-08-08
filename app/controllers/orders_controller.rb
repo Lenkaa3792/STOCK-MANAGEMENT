@@ -3,22 +3,20 @@ class OrdersController < ApplicationController
 
   # GET /orders
   def index
-    @orders = Order.all
-    render json: @orders
+    @orders = Order.includes(order_details: :product).all
+    render json: @orders.as_json(include: { order_details: { include: :product } })
   end
 
   # GET /orders/:id
   def show
-    render json: @order
+    render json: @order.as_json(include: { order_details: { include: :product } })
   end
 
   # POST /orders
   def create
     @order = Order.new(order_params)
     if @order.save
-      # If you need to create order details
-      create_order_details(@order)
-      render json: @order, status: :created, location: @order
+      render json: @order.as_json(include: { order_details: { include: :product } }), status: :created
     else
       render json: @order.errors, status: :unprocessable_entity
     end
@@ -27,7 +25,7 @@ class OrdersController < ApplicationController
   # PATCH/PUT /orders/:id
   def update
     if @order.update(order_params)
-      render json: @order
+      render json: @order.as_json(include: { order_details: { include: :product } })
     else
       render json: @order.errors, status: :unprocessable_entity
     end
@@ -49,22 +47,8 @@ class OrdersController < ApplicationController
     params.require(:order).permit(
       :order_date,
       :status,
-      :user_id
-      # Removed :price from here
+      :user_id,
+      order_details_attributes: [:id, :product_id, :quantity, :price, :_destroy]
     )
-  end
-
-  def create_order_details(order)
-    # Example logic to create order details
-    # Assuming you are passing order details in params
-    order_details_params = params[:order][:order_details] || []
-    order_details_params.each do |detail|
-      OrderDetail.create!(
-        order_id: order.id,
-        product_id: detail[:product_id],
-        quantity: detail[:quantity],
-        price: detail[:price] # Make sure price is handled in OrderDetail
-      )
-    end
   end
 end

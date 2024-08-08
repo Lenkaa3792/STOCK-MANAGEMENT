@@ -16,8 +16,7 @@ class DeliveriesController < ApplicationController
   def create
     @delivery = Delivery.new(delivery_params)
     if @delivery.save
-      create_expense if params[:expense] # Check if expense params are provided
-      render json: @delivery, status: :created, location: @delivery
+      render json: @delivery, status: :created
     else
       render json: @delivery.errors, status: :unprocessable_entity
     end
@@ -45,20 +44,6 @@ class DeliveriesController < ApplicationController
   end
 
   def delivery_params
-    params.require(:delivery).permit(
-      :order_id,
-      :scheduled_date,
-      :delivery_date,
-      :status
-    )
-  end
-
-  def create_expense
-    Expense.create!(
-      description: params[:expense][:description],
-      amount: params[:expense][:amount],
-      expense_date: params[:expense][:expense_date],
-      category: params[:expense][:category]
-    )
+    params.require(:delivery).permit(:order_id, :scheduled_date, :delivery_date, :status, :address)
   end
 end
