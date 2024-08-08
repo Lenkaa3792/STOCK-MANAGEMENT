@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_08_07_095040) do
+ActiveRecord::Schema[7.0].define(version: 2024_08_08_091454) do
   create_table "deliveries", force: :cascade do |t|
     t.integer "order_id", null: false
     t.datetime "scheduled_date"
@@ -18,7 +18,9 @@ ActiveRecord::Schema[7.0].define(version: 2024_08_07_095040) do
     t.string "status"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "address"
     t.index ["order_id"], name: "index_deliveries_on_order_id"
+    t.index ["status"], name: "index_deliveries_on_status"
   end
 
   create_table "expenses", force: :cascade do |t|
@@ -89,6 +91,10 @@ ActiveRecord::Schema[7.0].define(version: 2024_08_07_095040) do
     t.datetime "sale_date"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "delivery_id"
+    t.integer "order_id"
+    t.index ["delivery_id"], name: "index_sales_on_delivery_id"
+    t.index ["order_id"], name: "index_sales_on_order_id"
     t.index ["product_id"], name: "index_sales_on_product_id"
     t.index ["user_id"], name: "index_sales_on_user_id"
   end
@@ -117,6 +123,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_08_07_095040) do
   add_foreign_key "order_details", "orders"
   add_foreign_key "order_details", "products"
   add_foreign_key "orders", "users"
+  add_foreign_key "sales", "deliveries"
+  add_foreign_key "sales", "orders"
   add_foreign_key "sales", "products"
   add_foreign_key "sales", "users"
 end
