@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_08_08_091454) do
+ActiveRecord::Schema[7.0].define(version: 2024_08_08_130923) do
   create_table "deliveries", force: :cascade do |t|
     t.integer "order_id", null: false
     t.datetime "scheduled_date"
@@ -19,6 +19,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_08_08_091454) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "address"
+    t.integer "delivery_cost"
     t.index ["order_id"], name: "index_deliveries_on_order_id"
     t.index ["status"], name: "index_deliveries_on_status"
   end
@@ -52,23 +53,15 @@ ActiveRecord::Schema[7.0].define(version: 2024_08_08_091454) do
     t.index ["user_id"], name: "index_notifications_on_user_id"
   end
 
-  create_table "order_details", force: :cascade do |t|
-    t.integer "order_id", null: false
-    t.integer "product_id", null: false
-    t.integer "quantity"
-    t.decimal "price"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["order_id"], name: "index_order_details_on_order_id"
-    t.index ["product_id"], name: "index_order_details_on_product_id"
-  end
-
   create_table "orders", force: :cascade do |t|
     t.integer "user_id", null: false
     t.datetime "order_date"
     t.string "status"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "product_id"
+    t.integer "quantity"
+    t.decimal "price"
     t.index ["user_id"], name: "index_orders_on_user_id"
   end
 
@@ -120,8 +113,6 @@ ActiveRecord::Schema[7.0].define(version: 2024_08_08_091454) do
 
   add_foreign_key "deliveries", "orders"
   add_foreign_key "notifications", "users"
-  add_foreign_key "order_details", "orders"
-  add_foreign_key "order_details", "products"
   add_foreign_key "orders", "users"
   add_foreign_key "sales", "deliveries"
   add_foreign_key "sales", "orders"

@@ -1,10 +1,14 @@
 class Order < ApplicationRecord
   belongs_to :user
-  has_many :order_details, dependent: :destroy
-  has_many :products, through: :order_details
+  belongs_to :product # Direct association with Product
+
   has_one :delivery
-  accepts_nested_attributes_for :order_details, allow_destroy: true
 
   validates :order_date, presence: true
   validates :status, presence: true
+  validates :product_id, presence: true
+  validates :quantity, numericality: { only_integer: true, greater_than: 0 }
+  validates :price, numericality: { greater_than_or_equal_to: 0 }
+
+  # You might need to adjust methods or scopes depending on your requirements
 end
