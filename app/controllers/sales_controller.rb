@@ -4,9 +4,10 @@ class SalesController < ApplicationController
 
   # GET /sales
   def index
-    @sales = Sale.includes(:user).all
-    render json: @sales.as_json(include: :user)
+    @sales = Sale.includes(:user, :product).all
+    render json: @sales.as_json(include: [:user, :product])
   end
+
 
   # GET /sales/:id
   def show
@@ -17,7 +18,7 @@ class SalesController < ApplicationController
   def create
     @sale = Sale.new(sale_params)
     if @sale.save
-      update_product_stock(@sale.product_id, @sale.quantity)
+      update_product_stock(@sale.product_id, -@sale.quantity) # Reduce stock level
       render json: @sale, status: :created, location: @sale
     else
       render json: @sale.errors, status: :unprocessable_entity
@@ -26,7 +27,11 @@ class SalesController < ApplicationController
 
   # PATCH/PUT /sales/:id
   def update
+    old_quantity = @sale.quantity
     if @sale.update(sale_params)
+      new_quantity = @sale.quantity
+      quantity_change = old_quantity - new_quantity
+      update_product_stock(@sale.product_id, quantity_change)
       render json: @sale
     else
       render json: @sale.errors, status: :unprocessable_entity
@@ -35,8 +40,8 @@ class SalesController < ApplicationController
 
   # DELETE /sales/:id
   def destroy
-    # First, increase the stock level of the product
-    update_product_stock(@sale.product_id, -@sale.quantity)
+    # Increase the stock level of the product
+    update_product_stock(@sale.product_id, @sale.quantity)
     @sale.destroy
     head :no_content
   end
