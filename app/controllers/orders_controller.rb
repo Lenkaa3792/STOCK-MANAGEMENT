@@ -4,19 +4,32 @@ class OrdersController < ApplicationController
   # GET /orders
   def index
     @orders = Order.all
-    render json: @orders.as_json(include: { product: {}, user: {} }) # Include any relevant associations
+    render json: @orders
   end
 
   # GET /orders/:id
   def show
-    render json: @order.as_json(include: { product: {}, user: {} }) # Include any relevant associations
+    render json: @order
   end
 
   # POST /orders
   def create
     @order = Order.new(order_params)
     if @order.save
-      render json: @order.as_json(include: { product: {}, user: {} }), status: :created
+      # Create a sale when an order is made
+      Sale.create!(
+        user: @order.user,
+        product: @order.product,
+        quantity: @order.quantity,
+        total_price: @order.price,
+        sale_date: @order.order_date,
+        order: @order
+      )
+
+      # Update stock level after sale
+      @order.product.update!(stock_level: @order.product.stock_level - @order.quantity)
+
+      render json: @order, status: :created, location: @order
     else
       render json: @order.errors, status: :unprocessable_entity
     end
@@ -25,7 +38,7 @@ class OrdersController < ApplicationController
   # PATCH/PUT /orders/:id
   def update
     if @order.update(order_params)
-      render json: @order.as_json(include: { product: {}, user: {} })
+      render json: @order
     else
       render json: @order.errors, status: :unprocessable_entity
     end

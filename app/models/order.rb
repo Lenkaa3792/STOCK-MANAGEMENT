@@ -1,8 +1,6 @@
 class Order < ApplicationRecord
   belongs_to :user
-  belongs_to :product # Direct association with Product
-
-  has_one :delivery
+  belongs_to :product
 
   validates :order_date, presence: true
   validates :status, presence: true
