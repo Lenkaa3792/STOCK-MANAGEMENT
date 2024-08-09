@@ -2,7 +2,7 @@ class Sale < ApplicationRecord
   belongs_to :user
   belongs_to :product
   belongs_to :order
-  belongs_to :delivery
+  # belongs_to :delivery
 
   validates :quantity, numericality: { only_integer: true, greater_than: 0 }
   validates :total_price, numericality: { greater_than_or_equal_to: 0 }
