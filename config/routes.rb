@@ -8,7 +8,11 @@ Rails.application.routes.draw do
   resources :users, only: [:index, :show, :create, :update, :destroy]
 
   # Other resources for your app
-  resources :products, only: [:index, :show, :create, :update, :destroy]
+  resources :products do
+    member do
+      patch 'restock' # Add this line to define the custom restock route
+    end
+  end
   resources :sales, only: [:index, :show, :create, :update, :destroy]
   resources :orders, only: [:index, :show, :create, :update, :destroy]
   resources :order_details, only: [:index, :show, :create, :update, :destroy]
