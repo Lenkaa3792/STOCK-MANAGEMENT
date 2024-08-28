@@ -1,33 +1,40 @@
 class OrdersController < ApplicationController
   before_action :set_order, only: %i[show update destroy]
 
-  # GET /orders
-  def index
+   # GET /orders
+   def index
     @orders = Order.all
     render json: @orders
   end
 
-  # GET /orders/:id
-  def show
-    render json: @order
-  end
-
   # POST /orders
+
   def create
-    @order = Order.new(order_params)
+    @order = Order.new(order_params.except(:price, :commission, :final_price))
+    product = Product.find(@order.product_id)
+    base_price = product.price
+    quantity = @order.quantity
+
+    total_base_price = quantity * base_price
+    final_price = params[:order][:final_price].to_d # Ensure this is provided and accurate
+
+    commission = final_price - total_base_price
+
+    @order.price = total_base_price
+
     if @order.save
-      # Create a sale when an order is made
       Sale.create!(
         user: @order.user,
-        product: @order.product,
-        quantity: @order.quantity,
-        total_price: @order.price,
+        product: product,
+        quantity: quantity,
+        total_price: total_base_price,
         sale_date: @order.order_date,
-        order: @order
+        order: @order,
+        commission: commission,
+        final_price: final_price
       )
 
-      # Update stock level after sale
-      @order.product.update!(stock_level: @order.product.stock_level - @order.quantity)
+      product.update!(stock_level: product.stock_level - quantity)
 
       render json: @order, status: :created, location: @order
     else
@@ -35,20 +42,6 @@ class OrdersController < ApplicationController
     end
   end
 
-  # PATCH/PUT /orders/:id
-  def update
-    if @order.update(order_params)
-      render json: @order
-    else
-      render json: @order.errors, status: :unprocessable_entity
-    end
-  end
-
-  # DELETE /orders/:id
-  def destroy
-    @order.destroy
-    head :no_content
-  end
 
   private
 
@@ -57,6 +50,6 @@ class OrdersController < ApplicationController
   end
 
   def order_params
-    params.require(:order).permit(:order_date, :status, :user_id, :product_id, :quantity, :price)
+    params.require(:order).permit(:order_date, :status, :user_id, :product_id, :quantity)
   end
 end

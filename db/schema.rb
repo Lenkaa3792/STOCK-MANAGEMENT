@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_08_08_130923) do
+ActiveRecord::Schema[7.0].define(version: 2024_08_28_102318) do
   create_table "deliveries", force: :cascade do |t|
     t.integer "order_id", null: false
     t.datetime "scheduled_date"
@@ -86,6 +86,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_08_08_130923) do
     t.datetime "updated_at", null: false
     t.integer "delivery_id"
     t.integer "order_id"
+    t.decimal "commission", precision: 10, scale: 2, default: "0.0"
+    t.decimal "final_price", precision: 10, scale: 2, default: "0.0"
     t.index ["delivery_id"], name: "index_sales_on_delivery_id"
     t.index ["order_id"], name: "index_sales_on_order_id"
     t.index ["product_id"], name: "index_sales_on_product_id"
