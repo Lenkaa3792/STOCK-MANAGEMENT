@@ -57,7 +57,7 @@ class SalesController < ApplicationController
   end
 
   def sale_params
-    params.require(:sale).permit(:product_id, :user_id, :quantity, :total_price, :sale_date)
+    params.require(:sale).permit(:product_id, :user_id, :quantity, :total_price, :sale_date, :final_price, :commission)
   end
 
   def update_product_stock(product_id, quantity_change)
