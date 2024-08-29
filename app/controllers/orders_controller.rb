@@ -1,14 +1,13 @@
 class OrdersController < ApplicationController
   before_action :set_order, only: %i[show update destroy]
 
-   # GET /orders
-   def index
+  # GET /orders
+  def index
     @orders = Order.all
     render json: @orders
   end
 
   # POST /orders
-
   def create
     @order = Order.new(order_params.except(:price, :commission, :final_price))
     product = Product.find(@order.product_id)
@@ -23,12 +22,15 @@ class OrdersController < ApplicationController
     @order.price = total_base_price
 
     if @order.save
+      # Set the sale date to the current date and time
+      sale_date = Time.current # or use `Time.now` if you're not using Rails Time helpers
+
       Sale.create!(
         user: @order.user,
         product: product,
         quantity: quantity,
         total_price: total_base_price,
-        sale_date: @order.order_date,
+        sale_date: sale_date,
         order: @order,
         commission: commission,
         final_price: final_price
@@ -41,7 +43,6 @@ class OrdersController < ApplicationController
       render json: @order.errors, status: :unprocessable_entity
     end
   end
-
 
   private
 
